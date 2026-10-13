@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>YOUNG LAB – MYTHAMLEE</title>
+<style>
+:root{color-scheme:light;--b:#0b5ed7;--bd:#083c8c;--t:#0fb5ae;--bg:#eef5fc;--tx:#12263f;--m:#5a6f88;--r:#d63b3b;box-sizing:border-box;padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:0;z-index:5;background:linear-gradient(120deg,var(--bd),var(--b) 60%,var(--t));color:#fff;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px}
+h1{margin:0;font-size:clamp(18px,3.4vw,26px)}header p{margin:2px 0 0;font-size:13px;opacity:.95}
+main{max-width:1100px;margin:0 auto;padding:14px;display:grid;gap:14px}
+.card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 2px 10px #0b5ed71a;border-top:3px solid var(--t)}
+h2{margin:0 0 8px;font-size:17px;color:var(--bd)}canvas{width:100%;display:block;border-radius:8px;background:#fafcff}
+.note{font-size:12.5px;color:var(--m)}.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:800px){.g2{grid-template-columns:1fr}}
+.ctl{display:grid;grid-template-columns:1fr 90px;gap:4px 10px;align-items:center;margin-bottom:8px}.ctl label{grid-column:1/3;font-weight:600}.ctl input[type=range]{width:100%;accent-color:var(--b)}
+input[type=number],input[type=text],select{width:100%;padding:6px;border:1px solid #b9cbe0;border-radius:6px;font:inherit}
+.err{color:var(--r);font-weight:600;min-height:20px;font-size:13.5px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}button{border:0;border-radius:8px;padding:8px 12px;font:600 13.5px system-ui,sans-serif;cursor:pointer;background:var(--b);color:#fff}
+button.s{background:var(--t)}button.g{background:#6b7c93}button.d{background:var(--r)}
+.src{border:1px solid #cfdcec;border-radius:10px;padding:8px;margin-bottom:8px}.sh{display:flex;gap:8px;align-items:center;margin-bottom:6px}.sh input[type=text]{flex:1}
+.sw{display:inline-block;width:18px;height:18px;border-radius:4px;border:1px solid #0003;flex:none}
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.res div{background:#f1f7ff;border-radius:8px;padding:8px}.res b{display:block;font-size:18px;color:var(--bd)}.res span{font-size:12px;color:var(--m)}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:700px}th,td{border:1px solid #cfdcec;padding:5px 7px;text-align:center;font-size:13.5px}th{background:#e3effd;color:var(--bd)}
+tr.go{cursor:pointer}tr.go:hover{background:#fff8d6}.ok{color:#0a7a45;font-weight:700}.bad{color:var(--r);font-weight:700}
+footer{text-align:center;padding:14px;font-size:13px;color:var(--m)}
+</style></head><body>
+<header><h1>YOUNG LAB – MYTHAMLEE</h1><p>Developed by mythamlee · Giao thoa ánh sáng Young nhiều nguồn – Vật lí 12</p></header>
+<main>
+<section class="card"><h2>1. Chế độ thí nghiệm và nguồn sáng</h2>
+<div class="g2"><div>
+<label><b>Chế độ:</b></label><select id="mode"><option value="shared">Cùng bố trí thí nghiệm (chung a, D)</option><option value="indep">Các hệ thí nghiệm độc lập (a, D riêng)</option></select>
+<div class="note" id="modeNote" style="margin:4px 0 8px"></div>
+<div id="glob"><div class="ctl"><label>Khoảng cách hai khe a (mm)</label><input type="range" id="ra" min="0.1" max="1" step="0.1"><input type="number" id="na" min="0.1" max="1" step="0.1"></div>
+<div class="ctl"><label>Khoảng cách khe – màn D (m)</label><input type="range" id="rd" min="0.5" max="3" step="0.1"><input type="number" id="nd" min="0.5" max="3" step="0.1"></div></div>
+<div class="err" id="err"></div>
+<div class="btns"><button class="s" id="add">+ THÊM NGUỒN (tối đa 3)</button><button id="go">BẮT ĐẦU</button><button class="g" id="pause">TẠM DỪNG</button><button class="g" id="reset">ĐẶT LẠI</button></div>
+</div><div id="sl"></div></div></section>
+
+<section class="card"><h2>2. Sơ đồ bố trí</h2><canvas id="cd" data-h="230"></canvas><div class="note">⚠ Sơ đồ phóng đại, <b>không theo tỉ lệ thực</b>. Hai khe song song nhau; các vân là dải ngang trên màn.</div></section>
+
+<section class="card"><h2>3. Màn quan sát, thước đo và vị trí trùng vân</h2>
+<div class="btns"><select id="disp" style="width:auto"><option value="sep">Hiển thị riêng từng nguồn</option><option value="over">Chồng các hệ vân thành phần</option><option value="comp">Mô phỏng tổng hợp nhiều bước sóng</option></select>
+<button class="g" id="zi">＋ PHÓNG TO</button><button class="g" id="zo">－ THU NHỎ</button><button class="g" id="zr">TỰ ĐỘNG / VỀ O</button></div>
+<canvas id="cs" data-h="400" style="touch-action:none;cursor:ns-resize"></canvas>
+<div class="note" id="cap"></div>
+<div class="note">Kéo con trỏ <span style="color:#ff6b6b">đỏ x₁</span> và <span style="color:#6ea8ff">xanh x₂</span> trên màn để đo; lăn chuột để phóng/thu. Mô hình lí tưởng I = cos²(πx/i) cho từng nguồn (hai khe cùng cường độ, bỏ qua nhiễu xạ khe).</div></section>
+
+<div class="g2">
+<section class="card"><h2>4. Kết quả từng nguồn</h2><div class="tw"><table style="min-width:0"><thead><tr><th>Nguồn</th><th>λ (nm)</th><th>Màu</th><th>i (mm)</th><th>Tối 1 (mm)</th></tr></thead><tbody id="rt"></tbody></table></div>
+<p class="note">i = λD/a (đổi về SI). Vân sáng x = m·i; vân tối x = (m+½)·i.</p></section>
+<section class="card"><h2>5. Tìm vị trí trùng vân sáng</h2>
+<div class="ctl"><label>Miền khảo sát: |x| ≤ (mm)</label><input type="number" id="xm" min="1" step="1"><span></span></div>
+<div class="ctl"><label>Dung sai vị trí (mm)</label><input type="number" id="tol" min="0" step="0.01"><span></span></div>
+<div class="btns"><button id="find">TÌM VỊ TRÍ TRÙNG VÂN SÁNG</button></div><div class="err" id="cerr"></div>
+<div class="tw"><table style="min-width:0"><thead><tr><th>x (mm)</th><th>Bậc m (từng nguồn)</th><th>Sai lệch max</th><th>Kết luận</th></tr></thead><tbody id="ct"><tr><td colspan="4" class="note">Chưa tìm.</td></tr></tbody></table></div>
+<div class="note">Bấm một dòng để chuyển tới vị trí trên màn. Chỉ tính vân sáng; so sánh bằng dung sai, không dùng dấu "=" tuyệt đối.</div></section></div>
+
+<section class="card"><h2>6. Đo khoảng vân</h2>
+<div class="res"><div><select id="refs"></select><span>Nguồn dùng để so sánh</span></div><div><b id="m1">–</b><span>x₁ (mm)</span></div><div><b id="m2">–</b><span>x₂ (mm)</span></div><div><b id="md">–</b><span>Δx = |x₂−x₁| (mm)</span></div>
+<div><input type="number" id="mn" min="1" step="1" value="1"><span>n: số khoảng vân giữa hai vân sáng</span></div><div><b id="mi">–</b><span>i đo = Δx / n (mm)</span></div><div><b id="me">–</b><span>Sai lệch so với i lí thuyết</span></div></div>
+<div class="btns"><button id="sv">LƯU LẦN ĐO</button><button class="d" id="clr">XÓA BẢNG SỐ LIỆU</button></div></section>
+
+<section class="card"><h2>7. Bảng số liệu</h2><div class="tw"><table><thead><tr><th>STT</th><th>Nguồn</th><th>λ (nm)</th><th>a (mm)</th><th>D (m)</th><th>i lý thuyết (mm)</th><th>i đo (mm)</th><th>λ tính từ i đo (nm)</th><th>Nhận xét</th><th>Xóa</th></tr></thead><tbody id="tb"></tbody></table></div>
+<div class="btns"><button class="s" id="csv">XUẤT BẢNG CSV</button><button class="g" id="cp">SAO CHÉP BẢNG</button></div><div class="note" id="ex"></div><textarea id="ta" style="display:none;width:100%;height:110px"></textarea></section>
+
+<section class="card"><h2>8. Lưu, mở và xuất thí nghiệm</h2>
+<div class="g2"><div><label><b>Tên thí nghiệm</b></label><input type="text" id="en">
+<div class="btns"><button id="s1">LƯU</button><button class="s" id="s2">LƯU BẢN SAO</button><button class="g" id="s3">ĐỔI TÊN</button></div>
+<div class="btns"><button class="g" id="xj">XUẤT JSON</button><button class="g" id="ij">NHẬP JSON</button></div><input type="file" id="imp" accept=".json,application/json" style="display:none"></div>
+<div><label><b>Các bản đã lưu</b></label><select id="ls" size="5" style="height:auto"></select><div class="btns"><button id="op">MỞ</button><button class="d" id="dl">XÓA BẢN LƯU</button></div></div></div>
+<div class="note" id="sm"></div></section>
+
+<section class="card"><h2>9. Kiểm thử tự động</h2><div class="btns"><button id="tests">CHẠY KIỂM THỬ</button></div><div class="tw"><table style="min-width:0"><tbody id="tr"></tbody></table></div><div class="note">Các kiểm thử chạy ngay trên trình duyệt của bạn khi bấm nút.</div></section>
+</main>
+<footer>YOUNG LAB – MYTHAMLEE · Developed by mythamlee</footer>
+
+<script id="core">
+const SI=(l,a,d)=>l*1e-9*d/(a*1e-3);
+function wl2rgb(w){let r=0,g=0,b=0;if(w<440){r=-(w-440)/60;b=1}else if(w<490){g=(w-440)/50;b=1}else if(w<510){g=1;b=-(w-510)/20}else if(w<580){r=(w-510)/70;g=1}else if(w<645){r=1;g=-(w-645)/65}else r=1;
+const f=w<420?.3+.7*(w-380)/40:w>700?.3+.7*(750-w)/50:1;return[r,g,b].map(v=>Math.round(255*Math.pow(v*f,.8)))}
+const colName=w=>w<450?'tím':w<485?'xanh lam':w<500?'xanh lục lam':w<565?'xanh lục':w<590?'vàng':w<625?'cam':'đỏ';
+function chk(k,v){const R={l:[380,750,'λ (nm)'],a:[.1,1,'a (mm)'],d:[.5,3,'D (m)']}[k],n=typeof v=='number'?v:parseFloat(String(v).replace(',','.'));
+if(!isFinite(n))return R[2]+': không phải số hợp lệ.';if(n<R[0]||n>R[1])return R[2]+' phải nằm trong '+R[0]+' – '+R[1]+'.';return''}
+function fresh(){return{name:'Thí nghiệm mới',author:'mythamlee',mode:'shared',disp:'comp',a:.5,d:1.5,srcs:[{id:1,name:'Nguồn 1',l:600,a:.5,d:1.5,on:true}],nid:2,cen:0,half:0,xmax:60,tol:.05,y1:-1.8,y2:1.8,n:1,ref:1,rows:[],coin:null}}
+const iOf=(S,s)=>S.mode=='shared'?SI(s.l,S.a,S.d)*1e3:SI(s.l,s.a,s.d)*1e3;
+function findCoin(S,xmax,tol){const act=S.srcs.filter(s=>s.on);
+if(S.mode!='shared')return{err:'Chỉ phân tích trùng vân ở chế độ "Cùng bố trí thí nghiệm".'};
+if(act.length<2)return{err:'Cần bật ít nhất 2 nguồn để tìm trùng vân.'};
+if(!(xmax>0)||!(tol>=0))return{err:'Miền khảo sát phải > 0 và dung sai ≥ 0.'};
+const ii=act.map(s=>iOf(S,s)),r=ii.indexOf(Math.max(...ii)),M=Math.floor(xmax/ii[r]+1e-9);
+if(M<1)return{err:'Miền khảo sát quá hẹp (nhỏ hơn một khoảng vân lớn nhất = '+ii[r].toFixed(2)+' mm).'};
+const list=[];for(let m=-M;m<=M&&list.length<400;m++){const x=m*ii[r],ms=ii.map(i=>Math.round(x/i)),dev=Math.max(...ii.map((i,k)=>Math.abs(ms[k]*i-x)));
+if(dev<=tol)list.push({x:x,ms:ms,dev:dev,exact:dev<1e-9,ids:act.map(s=>s.id)})}
+return{list:list}}
+function selfTests(){const T=[],add=(n,ok,d)=>T.push({n:n,ok:!!ok,d:d}),near=(a,b)=>Math.abs(a-b)<1e-6;
+let S=fresh();const i1=iOf(S,S.srcs[0]);add('Test 1: 600 nm, a=0,5 mm, D=1,5 m → i = 1,8 mm',near(i1,1.8),'i = '+i1.toFixed(4)+' mm');
+S=fresh();S.srcs.push({id:2,name:'N2',l:450,a:.5,d:1.5,on:true});let r=findCoin(S,30,.05),ok=r.list&&r.list.length==11&&r.list.every(p=>near(p.x/5.4,Math.round(p.x/5.4)));
+add('Test 2: 600 & 450 nm → x = 5,4k mm trong ±30 mm',ok,r.list?r.list.map(p=>p.x.toFixed(1)).join('; '):r.err);
+S.srcs.push({id:3,name:'N3',l:400,a:.5,d:1.5,on:true});r=findCoin(S,30,.05);const p=r.list&&r.list.find(q=>near(q.x,10.8));
+add('Test 3: 3 nguồn – tại x = 10,8 mm: m = 6, 8, 9 (cả ba trùng)',p&&p.ms.join()=='6,8,9','trùng cả ba tại x=±'+(r.list.filter(q=>q.x>0).map(q=>q.x.toFixed(1)).join('; ')));
+const q=JSON.parse(JSON.stringify(S));add('Test 4: tuần tự hóa → khôi phục giữ nguyên cấu hình và kết quả',JSON.stringify(q)==JSON.stringify(S)&&JSON.stringify(findCoin(q,30,.05))==JSON.stringify(r),'JSON round-trip');
+add('Test 6a: dữ liệu sai bị từ chối (λ=300, a=0, D="abc")',chk('l',300)&&chk('a',0)&&chk('d','abc')&&!chk('l',600),'');
+S.srcs.forEach(s=>s.on=false);add('Test 6b: không có nguồn bật → báo lỗi, không NaN',!!findCoin(S,30,.05).err,'');
+S.srcs[0].on=S.srcs[1].on=true;add('Test 6c: miền khảo sát quá hẹp → báo lỗi',!!findCoin(S,1,.05).err,'');
+return T}
+</script>
+<script id="app">
+const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let S=fresh(),run=true,t=0,drag=0,geo=null;
+const half=()=>S.half||autoHalf(),act=()=>S.srcs.filter(s=>s.on);
+function autoHalf(){const a=act().map(s=>iOf(S,s));return a.length?6*Math.max(...a):10}
+function persist(){try{localStorage.setItem('ylab_auto',JSON.stringify(S))}catch(e){}}
+function err(m){$('err').textContent=m||''}
+function setup(c){const d=devicePixelRatio||1,w=c.clientWidth,h=+c.dataset.h;c.width=Math.round(w*d);c.height=Math.round(h*d);c.style.height=h+'px';const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return[x,w,h]}
+function niceStep(ppm){return[.01,.02,.05,.1,.2,.5,1,2,5,10,20,50,100,200,500,1000].find(s=>s*ppm>=40)||1000}
+function renderSrc(){$('sl').innerHTML=S.srcs.map(s=>`<div class="src" data-id="${s.id}"><div class="sh"><span class="sw" style="background:rgb(${wl2rgb(s.l)})"></span><input type="text" data-f="name" value="${esc(s.name)}"><label style="white-space:nowrap"><input type="checkbox" data-f="on" ${s.on?'checked':''}> Bật</label><button class="d" data-del="${s.id}">Xóa</button></div>
+<div class="ctl"><label>λ (nm) – <span class="cn">${colName(s.l)}</span></label><input type="range" data-f="l" min="380" max="750" step="10" value="${s.l}"><input type="number" data-f="l" min="380" max="750" step="1" value="${s.l}"></div>
+${S.mode=='indep'?`<div class="ctl"><label>a (mm)</label><input type="range" data-f="a" min="0.1" max="1" step="0.1" value="${s.a}"><input type="number" data-f="a" min="0.1" max="1" step="0.1" value="${s.a}"></div><div class="ctl"><label>D (m)</label><input type="range" data-f="d" min="0.5" max="3" step="0.1" value="${s.d}"><input type="number" data-f="d" min="0.5" max="3" step="0.1" value="${s.d}"></div>`:''}</div>`).join('');
+$('refs').innerHTML=S.srcs.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');if(!S.srcs.some(s=>s.id==S.ref))S.ref=S.srcs[0].id;$('refs').value=S.ref}
+function sync(){$('mode').value=S.mode;$('disp').value=S.mode=='shared'?S.disp:'sep';$('disp').disabled=S.mode!='shared';$('glob').style.display=S.mode=='shared'?'':'none';
+$('modeNote').textContent=S.mode=='shared'?'Các nguồn cùng chiếu vào một hệ hai khe và một màn (chung a, D).':'Mỗi nguồn là một hệ riêng với a, D riêng; chỉ so sánh hệ vân, không phân tích trùng vân.';
+['ra','na'].forEach(k=>$(k).value=S.a);['rd','nd'].forEach(k=>$(k).value=S.d);$('xm').value=S.xmax;$('tol').value=S.tol;$('mn').value=S.n;$('en').value=S.name;renderSrc();renderCoin();renderRows()}
+$('sl').addEventListener('input',onSrc);$('sl').addEventListener('change',onSrc);
+function onSrc(e){const el=e.target,row=el.closest('.src');if(!row)return;if(el.type=='number'&&e.type=='input')return;const s=S.srcs.find(q=>q.id==row.dataset.id),f=el.dataset.f;if(!s||!f)return;
+if(f=='name')s.name=el.value;else if(f=='on')s.on=el.checked;else{const m=chk(f,el.value);if(m){err('⚠ '+m+' Giá trị bị từ chối.');return}err();s[f]=+parseFloat(el.value).toFixed(f=='l'?0:1);row.querySelectorAll('[data-f="'+f+'"]').forEach(q=>q.value=s[f]);
+if(f=='l'){row.querySelector('.cn').textContent=colName(s.l);row.querySelector('.sw').style.background='rgb('+wl2rgb(s.l)+')'}}
+if(f=='name')$('refs').innerHTML=S.srcs.map(q=>`<option value="${q.id}">${esc(q.name)}</option>`).join(''),$('refs').value=S.ref;refresh()}
+$('sl').addEventListener('click',e=>{const id=e.target.dataset.del;if(id==null)return;if(S.srcs.length<2){err('⚠ Phải còn ít nhất 1 nguồn.');return}S.srcs=S.srcs.filter(s=>s.id!=id);S.coin=null;renderSrc();renderCoin();refresh()});
+$('add').onclick=()=>{if(S.srcs.length>=3){err('⚠ Tối đa 3 nguồn sáng.');return}const l=[600,450,400][S.srcs.length]||500;S.srcs.push({id:S.nid,name:'Nguồn '+S.nid,l:l,a:S.a,d:S.d,on:true});S.nid++;err();renderSrc();refresh()};
+function glob(k,from,raw){const m=chk(k,raw);if(m){err('⚠ '+m+' Giá trị bị từ chối.');return}err();S[k]=+parseFloat(raw).toFixed(1);$((k=='a'?'r':'r')+k).value=S[k];$('n'+k).value=S[k];S.srcs.forEach(s=>s[k]=S[k]);refresh()}
+['a','d'].forEach(k=>{$('r'+k).oninput=e=>glob(k,'r',e.target.value);$('n'+k).onchange=e=>glob(k,'n',e.target.value)});
+$('mode').onchange=e=>{S.mode=e.target.value;S.coin=null;sync();refresh()};
+$('disp').onchange=e=>{S.disp=e.target.value;refresh()};
+$('go').onclick=()=>run=true;$('pause').onclick=()=>run=false;
+$('reset').onclick=()=>{const keep=S.rows,nm=S.name;S=fresh();S.rows=keep;S.name=nm;err();sync();refresh()};
+const zoom=f=>{S.half=Math.min(5000,Math.max(.05,half()*f));refresh()};$('zi').onclick=()=>zoom(1/1.5);$('zo').onclick=()=>zoom(1.5);$('zr').onclick=()=>{S.half=0;S.cen=0;refresh()};
+$('cs').onwheel=e=>{e.preventDefault();zoom(e.deltaY>0?1.2:1/1.2)};
+const xAt=e=>{const R=$('cs').getBoundingClientRect();return geo.cen+(geo.h/2-(e.clientY-R.top))/geo.ppm};
+$('cs').onpointerdown=e=>{if(!geo)return;const v=xAt(e);drag=Math.abs(v-S.y1)<=Math.abs(v-S.y2)?1:2;$('cs').setPointerCapture(e.pointerId);mv(e)};
+function mv(e){if(!drag)return;const v=xAt(e);if(drag==1)S.y1=v;else S.y2=v;drawScreen();meas()}
+$('cs').onpointermove=mv;$('cs').onpointerup=$('cs').onpointercancel=()=>{drag=0;persist()};
+function drawScreen(){const[x,W,h]=setup($('cs')),H=half(),cen=S.cen,L=58,A=act(),ppm=h/(2*H),Y=v=>h/2-(v-cen)*ppm,X=py=>cen+(h/2-py)/ppm;geo={cen:cen,h:h,ppm:ppm};
+const info=A.map(s=>({s:s,i:iOf(S,s),c:wl2rgb(s.l)})),disp=S.mode=='shared'?S.disp:'sep';
+x.fillStyle='#0b0f1a';x.fillRect(L,0,W-L,h);x.font='13px system-ui';
+if(!A.length){x.fillStyle='#fff';x.fillText('Không có nguồn nào đang bật – hãy bật ít nhất một nguồn.',L+14,h/2)}
+else if(disp=='over'){info.forEach((o,k)=>{if(o.i*ppm<3)return;x.strokeStyle='rgb('+o.c+')';x.lineWidth=2;for(let m=Math.ceil((cen-H)/o.i);m*o.i<=cen+H;m++){const py=Y(m*o.i)+(k-1)*3;x.beginPath();x.moveTo(L,py);x.lineTo(W,py);x.stroke()}})}
+else{const n=disp=='sep'?info.length:1,cw=(W-L)/n,wt=info.length>1?.8:1;for(let py=0;py<h;py++){const xv=X(py+.5);
+if(disp=='sep')info.forEach((o,k)=>{const v=Math.pow(Math.cos(Math.PI*xv/o.i),2);x.fillStyle=`rgb(${o.c[0]*v|0},${o.c[1]*v|0},${o.c[2]*v|0})`;x.fillRect(L+k*cw,py,cw-(k<n-1?2:0),1)});
+else{let R=0,G=0,B=0;info.forEach(o=>{const v=Math.pow(Math.cos(Math.PI*xv/o.i),2)*wt;R+=o.c[0]*v;G+=o.c[1]*v;B+=o.c[2]*v});x.fillStyle=`rgb(${Math.min(255,R)|0},${Math.min(255,G)|0},${Math.min(255,B)|0})`;x.fillRect(L,py,W-L,1)}}}
+if(S.coin&&S.mode=='shared'){x.setLineDash([5,4]);x.strokeStyle=x.fillStyle='#ffe34d';x.lineWidth=1.5;S.coin.forEach(p=>{if(Math.abs(p.x-cen)>H)return;const py=Y(p.x);x.beginPath();x.moveTo(L,py);x.lineTo(W,py);x.stroke();x.fillText(p.x==0?'O':'x='+p.x.toFixed(2),L+4,py-3)});x.setLineDash([])}
+x.fillStyle='#fff';x.fillRect(0,0,L,h);x.strokeStyle=x.fillStyle='#12263f';x.lineWidth=1;x.font='11px system-ui';x.textAlign='right';const st=niceStep(ppm);
+for(let k=Math.ceil((cen-H)/st);k*st<=cen+H;k++){const py=Y(k*st);x.beginPath();x.moveTo(L-10,py);x.lineTo(L,py);x.stroke();x.fillText(+(k*st).toFixed(3),L-13,py+4)}
+x.textAlign='left';x.fillText('x (mm)',2,12);
+[[S.y1,'#ff6b6b','x₁'],[S.y2,'#6ea8ff','x₂']].forEach(c=>{const py=Y(c[0]);x.strokeStyle=x.fillStyle=c[1];x.lineWidth=2;x.beginPath();x.moveTo(0,py);x.lineTo(W,py);x.stroke();x.fillText(c[2],L+4,py-3)});
+$('cap').textContent={sep:'Chế độ riêng: mỗi cột là hệ vân của một nguồn (cột trái→phải theo thứ tự nguồn).',over:'Chế độ chồng: vạch màu = vị trí vân sáng của từng nguồn.',comp:'Chế độ tổng hợp: cộng cường độ các nguồn rồi tô màu – chỉ là mô phỏng ĐỊNH TÍNH, không phải cảm nhận màu thực.'}[disp]+' Tỉ lệ: thước khớp với '+ppm.toFixed(1)+' px/mm, hiển thị '+(2*H).toFixed(2)+' mm. Vạch vàng = vị trí trùng vân sáng.'}
+function drawDiag(){const[x,W,h]=setup($('cd')),cy=110,mx=W*.42,sx=W*.8,A=act().length?act():S.srcs,n=A.length,ay=14+30*S.a,off=run?(t*40)%24:0;x.font='13px system-ui';x.textAlign='center';
+A.forEach((s,k)=>{const yy=cy+(k-(n-1)/2)*22,c='rgb('+wl2rgb(s.l)+')';x.globalAlpha=s.on?1:.3;x.fillStyle=c;x.beginPath();x.arc(40,yy,8,0,7);x.fill();x.setLineDash([8,6]);x.lineDashOffset=-off;x.strokeStyle=c;x.lineWidth=3;x.beginPath();x.moveTo(52,yy);x.lineTo(mx,cy);x.stroke();x.setLineDash([]);
+x.setLineDash([6,5]);x.lineWidth=1.2;[-ay,ay].forEach(d=>{x.beginPath();x.moveTo(mx,cy+d);x.lineTo(sx,cy+(k-(n-1)/2)*14);x.stroke()});x.setLineDash([]);x.globalAlpha=1});
+x.fillStyle='#5a6f88';x.fillRect(mx-4,10,8,cy-ay-13);x.fillRect(mx-4,cy-ay+3,8,2*ay-6);x.fillRect(mx-4,cy+ay+3,8,h-cy-ay-30);x.fillRect(sx,10,10,h-40);
+x.fillStyle='#12263f';x.fillText('S₁',mx-16,cy-ay+4);x.fillText('S₂',mx-16,cy+ay+4);x.fillText('Hai khe',mx,12);x.fillText('Màn',sx+5,12);x.fillText('Nguồn',40,h-8);
+const d=S.mode=='shared'?'D = '+S.d.toFixed(1)+' m':'D riêng từng nguồn',a=S.mode=='shared'?'a = '+S.a.toFixed(1)+' mm':'a riêng';x.fillStyle='#0b5ed7';x.fillText(d+'  (khe → màn)',(mx+sx)/2,h-8);x.fillStyle='#d63b3b';x.textAlign='left';x.fillText(a,mx+10,cy+4);x.fillStyle='#0fb5ae';x.fillText('→ hướng truyền ánh sáng',60,22)}
+function tables(){$('rt').innerHTML=S.srcs.map(s=>{const i=iOf(S,s);return`<tr style="${s.on?'':'opacity:.4'}"><td>${esc(s.name)}</td><td>${s.l}</td><td>${colName(s.l)} <span class="sw" style="background:rgb(${wl2rgb(s.l)});width:12px;height:12px"></span></td><td>${i.toFixed(3)}</td><td>${(i/2).toFixed(3)}</td></tr>`}).join('')}
+function renderCoin(){const b=$('ct');if(!S.coin){b.innerHTML='<tr><td colspan="4" class="note">Chưa tìm.</td></tr>';return}
+b.innerHTML=S.coin.map((p,k)=>`<tr class="go" data-k="${k}"><td>${p.x==0?'0 (vân trung tâm O)':p.x.toFixed(3)}</td><td>${p.ms.join(' ; ')}</td><td>${p.dev.toExponential(1)}</td><td>${p.x==0?'Trung tâm':p.exact?'Trùng (mô hình lí tưởng)':'Trùng trong dung sai'}</td></tr>`).join('')||'<tr><td colspan="4" class="note">Không tìm được vị trí trùng trong miền khảo sát.</td></tr>'}
+$('ct').onclick=e=>{const r=e.target.closest('tr.go');if(!r)return;S.cen=S.coin[+r.dataset.k].x;refresh()};
+$('xm').onchange=e=>{S.xmax=parseFloat(e.target.value);persist()};$('tol').onchange=e=>{S.tol=parseFloat(e.target.value);persist()};
+$('find').onclick=()=>{S.xmax=parseFloat($('xm').value);S.tol=parseFloat($('tol').value);const r=findCoin(S,S.xmax,S.tol);$('cerr').textContent=r.err||'';if(r.err){S.coin=null}else{S.coin=r.list;S.half=Math.max(half(),S.xmax*1.05);S.cen=0}renderCoin();refresh()};
+function meas(){const s=S.srcs.find(q=>q.id==S.ref)||S.srcs[0],i=iOf(S,s),dy=Math.abs(S.y2-S.y1),n=parseInt($('mn').value);S.n=n>=1?n:1;
+$('m1').textContent=S.y1.toFixed(2);$('m2').textContent=S.y2.toFixed(2);$('md').textContent=dy.toFixed(2);
+if(n>=1&&dy>0){const im=dy/n;$('mi').textContent=im.toFixed(3);$('me').textContent=(Math.abs(im-i)/i*100).toFixed(1)+' %'}else{$('mi').textContent='–';$('me').textContent='–'}}
+$('mn').oninput=meas;$('refs').onchange=e=>{S.ref=+e.target.value;meas()};
+$('sv').onclick=()=>{const s=S.srcs.find(q=>q.id==S.ref)||S.srcs[0],[a,d]=S.mode=='shared'?[S.a,S.d]:[s.a,s.d],i=iOf(S,s),dy=Math.abs(S.y2-S.y1),n=parseInt($('mn').value);let im=null,note='Chưa đo khoảng vân';
+if(n>=1&&dy>0){im=dy/n;const e=Math.abs(im-i)/i*100;note=e<5?'Phù hợp lí thuyết (sai lệch '+e.toFixed(1)+'%)':'Sai lệch lớn ('+e.toFixed(1)+'%), cần đặt lại con trỏ vào tâm vân sáng'}
+S.rows.push({kind:s.name,l:s.l,a:a,d:d,i:i,im:im,lam:im==null?null:a*1e-3*im*1e-3/d*1e9,note:note});renderRows();persist();$('tb').scrollIntoView({block:'nearest'})};
+$('clr').onclick=()=>{S.rows=[];renderRows();persist()};
+function renderRows(){$('tb').innerHTML=S.rows.length?S.rows.map((r,k)=>`<tr><td>${k+1}</td><td>${esc(r.kind)}</td><td>${r.l}</td><td>${(+r.a).toFixed(1)}</td><td>${(+r.d).toFixed(1)}</td><td>${r.i.toFixed(3)}</td><td>${r.im==null?'–':r.im.toFixed(3)}</td><td>${r.lam==null?'–':r.lam.toFixed(0)}</td><td><input type="text" data-k="${k}" value="${esc(r.note)}" style="min-width:200px"></td><td><button class="d" data-del="${k}" style="padding:3px 8px">✕</button></td></tr>`).join(''):'<tr><td colspan="10" class="note">Chưa có lần đo nào.</td></tr>'}
+$('tb').addEventListener('input',e=>{if(e.target.dataset.k!=null){S.rows[+e.target.dataset.k].note=e.target.value;persist()}});
+$('tb').addEventListener('click',e=>{const k=e.target.dataset.del;if(k!=null){S.rows.splice(+k,1);renderRows();persist()}});
+function tbl(sep){const q=v=>sep==','?'"'+String(v).replace(/"/g,'""')+'"':String(v).replace(/[\t\r\n]/g,' ');return['STT','Nguồn','λ (nm)','a (mm)','D (m)','i lý thuyết (mm)','i đo (mm)','λ tính từ i đo (nm)','Nhận xét'].map(q).join(sep)+'\r\n'+S.rows.map((r,k)=>[k+1,r.kind,r.l,(+r.a).toFixed(1),(+r.d).toFixed(1),r.i.toFixed(3),r.im==null?'':r.im.toFixed(3),r.lam==null?'':r.lam.toFixed(0),r.note].map(q).join(sep)).join('\r\n')}
+async function dl(fn,data,mime,out){let d=null;try{if(typeof claude!='undefined')d=await claude.use('downloads')}catch(e){}
+if(d){try{await d.save({filename:fn,data:data});out.textContent='✔ Đã gửi yêu cầu lưu '+fn+' (xác nhận ở hộp thoại).';return}catch(e){if(e&&e.code=='declined'){out.textContent='Bạn đã hủy lưu file.';return}}}
+try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:mime}));a.download=fn;a.click();out.textContent='✔ Đã tạo file '+fn}catch(e){out.textContent='⚠ Không thể tạo file trong môi trường này; hãy dùng nút sao chép.'}}
+$('csv').onclick=()=>S.rows.length?dl('young-lab-so-lieu.csv','\ufeff'+tbl(','),'text/csv;charset=utf-8',$('ex')):$('ex').textContent='⚠ Chưa có số liệu để xuất.';
+$('cp').onclick=async()=>{if(!S.rows.length){$('ex').textContent='⚠ Chưa có số liệu để sao chép.';return}const t=tbl('\t');try{await navigator.clipboard.writeText(t);$('ex').textContent='✔ Đã sao chép, dán được vào Excel / Google Sheets.'}catch(e){$('ta').style.display='block';$('ta').value=t;$('ta').select();$('ex').textContent='Chọn toàn bộ trong ô bên dưới rồi sao chép (Ctrl/Cmd + C).'}};
+// Lưu / mở
+let bad=false;function lib(){try{const v=JSON.parse(localStorage.getItem('ylab_lib')||'[]');if(!Array.isArray(v))throw 0;return v}catch(e){bad=true;return[]}}
+function putLib(v){try{localStorage.setItem('ylab_lib',JSON.stringify(v));return true}catch(e){$('sm').textContent='⚠ Không lưu được vào trình duyệt (bộ nhớ bị chặn hoặc đầy). Hãy dùng XUẤT JSON.';return false}}
+function renderLib(){const v=lib();$('ls').innerHTML=v.map((e,k)=>`<option value="${k}">${esc(e.name)} – ${new Date(e.time).toLocaleString('vi-VN')}</option>`).join('');if(bad)$('sm').textContent='⚠ Dữ liệu lưu trữ bị hỏng nên đã bỏ qua.'}
+const pack=nm=>({name:nm,author:'mythamlee',time:Date.now(),data:JSON.parse(JSON.stringify(Object.assign(S,{name:nm,author:'mythamlee'})))});
+function doSave(copy){const nm=($('en').value.trim()||'Thí nghiệm không tên'),v=lib(),k=v.findIndex(e=>e.name==nm);S.name=nm;const p=pack(nm);if(k>=0&&!copy)v[k]=p;else{if(copy&&k>=0)p.name=p.data.name=nm+' (bản sao '+(v.length+1)+')';v.push(p)}if(putLib(v)){$('sm').textContent='✔ Đã lưu "'+p.name+'".';$('en').value=p.name;S.name=p.name}renderLib()}
+$('s1').onclick=()=>doSave(false);$('s2').onclick=()=>doSave(true);
+$('s3').onclick=()=>{const k=$('ls').value;if(k==='')return $('sm').textContent='⚠ Chọn một bản đã lưu để đổi tên.';const v=lib(),nm=$('en').value.trim();if(!nm)return $('sm').textContent='⚠ Nhập tên mới vào ô Tên thí nghiệm.';v[+k].name=v[+k].data.name=nm;putLib(v)&&($('sm').textContent='✔ Đã đổi tên.');renderLib()};
+function restore(d){if(!d||!Array.isArray(d.srcs)||d.srcs.length<1||d.srcs.length>3)throw new Error('Cấu hình không hợp lệ (số nguồn).');
+d.srcs.forEach(s=>{if(chk('l',s.l)||chk('a',s.a)||chk('d',s.d))throw new Error('Thông số nguồn ngoài phạm vi.')});if(chk('a',d.a)||chk('d',d.d))throw new Error('Thông số a, D ngoài phạm vi.');
+S=Object.assign(fresh(),d);sync();refresh()}
+$('op').onclick=()=>{const k=$('ls').value;if(k==='')return $('sm').textContent='⚠ Chọn một bản đã lưu.';try{restore(JSON.parse(JSON.stringify(lib()[+k].data)));$('sm').textContent='✔ Đã mở "'+S.name+'".'}catch(e){$('sm').textContent='⚠ '+e.message}};
+$('dl').onclick=()=>{const k=$('ls').value;if(k==='')return $('sm').textContent='⚠ Chọn một bản đã lưu.';const v=lib();if(!confirm('Xóa bản lưu "'+v[+k].name+'"?'))return;v.splice(+k,1);putLib(v);renderLib();$('sm').textContent='Đã xóa bản lưu.'};
+$('xj').onclick=()=>dl((S.name||'thi-nghiem').replace(/[^\w\-]+/g,'_')+'.json',JSON.stringify(pack($('en').value.trim()||S.name),null,1),'application/json',$('sm'));
+$('ij').onclick=()=>$('imp').click();$('imp').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);restore(o.data||o);$('sm').textContent='✔ Đã nhập "'+S.name+'".'}catch(x){$('sm').textContent='⚠ Không nhập được: '+x.message}};r.readAsText(f);e.target.value=''};
+$('tests').onclick=()=>{$('tr').innerHTML=selfTests().map(r=>`<tr><td style="text-align:left">${esc(r.n)}</td><td class="${r.ok?'ok':'bad'}">${r.ok?'ĐẠT':'CHƯA ĐẠT'}</td><td class="note">${esc(r.d)}</td></tr>`).join('')};
+function refresh(){tables();drawScreen();drawDiag();meas();persist()}
+(function(){try{const a=localStorage.getItem('ylab_auto');if(a)S=Object.assign(fresh(),JSON.parse(a));if(!S.srcs||S.srcs.some(s=>chk('l',s.l)||chk('a',s.a)||chk('d',s.d)))S=fresh()}catch(e){S=fresh()}})();
+sync();renderLib();refresh();addEventListener('resize',refresh);
+(function loop(ts){if(run){t=ts/1000;drawDiag()}requestAnimationFrame(loop)})(0);
+</script></body></html>
